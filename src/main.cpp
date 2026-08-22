@@ -51,6 +51,10 @@ std::string getMaskedPassword() {
     return password;
 }
 
+bool containsInvalidChars(const std::string& str) {
+    return str.find('|') != std::string::npos || str.find(',') != std::string::npos;
+}
+
 void displayGuestHelp() {
     std::cout << "\n================ GUEST HELP OPTIONS ================\n";
     std::cout << "1. Login     : Log into your account using ID and password.\n";
@@ -95,9 +99,10 @@ void handleCustomerMenu(RentalSystem& system, User* user) {
     bool logout = false;
     while (!logout) {
         std::cout << "\n[" << user->getName() << " (" << user->getRole() << ")] - Menu (Type h for Help)\n";
-        std::cout << "Enter Option: ";
-        std::string input;
-        std::cin >> input;
+        if (!(std::cin >> input)) {
+            std::cout << "\nInput stream closed. Exiting...\n";
+            exit(0);
+        }
 
         if (input == "h" || input == "H") {
             displayUserHelp(user);
@@ -194,9 +199,10 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
     bool logout = false;
     while (!logout) {
         std::cout << "\n[Admin Menu] - (Type h for Help)\n";
-        std::cout << "Enter Option: ";
-        std::string input;
-        std::cin >> input;
+        if (!(std::cin >> input)) {
+            std::cout << "\nInput stream closed. Exiting...\n";
+            exit(0);
+        }
 
         if (input == "h" || input == "H") {
             displayAdminHelp();
@@ -239,13 +245,17 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
                 std::string comp, model, reg, type;
                 int price;
                 std::cout << "Enter vehicle company: ";
-                std::cin >> comp;
+                if (!(std::cin >> comp)) { exit(0); }
                 std::cout << "Enter vehicle model: ";
-                std::cin >> model;
+                if (!(std::cin >> model)) { exit(0); }
                 std::cout << "Enter registration plate (unique): ";
-                std::cin >> reg;
+                if (!(std::cin >> reg)) { exit(0); }
                 std::cout << "Enter category type (SUV/Sedan/Hatchback): ";
-                std::cin >> type;
+                if (!(std::cin >> type)) { exit(0); }
+                if (containsInvalidChars(comp) || containsInvalidChars(model) || containsInvalidChars(reg) || containsInvalidChars(type)) {
+                    std::cout << "Error: Input fields cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter daily rent rate ($): ";
                 if (!(std::cin >> price) || price <= 0) {
                     std::cout << "Invalid price.\n";
@@ -273,14 +283,26 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
             case 6: {
                 std::string id, name, pass, role;
                 std::cout << "Enter user ID (unique): ";
-                std::cin >> id;
+                if (!(std::cin >> id)) { exit(0); }
+                if (containsInvalidChars(id)) {
+                    std::cout << "Error: ID cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter user Full Name: ";
                 std::cin.ignore();
-                std::getline(std::cin, name);
+                if (!std::getline(std::cin, name)) { exit(0); }
+                if (containsInvalidChars(name)) {
+                    std::cout << "Error: Name cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter password: ";
                 pass = getMaskedPassword();
+                if (containsInvalidChars(pass)) {
+                    std::cout << "Error: Password cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter role (customer/employee/admin): ";
-                std::cin >> role;
+                if (!(std::cin >> role)) { exit(0); }
                 if (role != "customer" && role != "employee" && role != "admin") {
                     std::cout << "Invalid role type.\n";
                     break;
@@ -350,10 +372,10 @@ int main() {
         std::cout << "3. Show Help\n";
         std::cout << "4. Exit\n";
         std::cout << "===========================================\n";
-        std::cout << "Enter choice: ";
-        
-        std::string input;
-        std::cin >> input;
+        if (!(std::cin >> input)) {
+            std::cout << "\nInput stream closed. Exiting...\n";
+            break;
+        }
         int choice = 0;
         try {
             choice = std::stoi(input);
@@ -366,7 +388,7 @@ int main() {
             case 1: {
                 std::string id, pass;
                 std::cout << "Enter ID: ";
-                std::cin >> id;
+                if (!(std::cin >> id)) { exit(0); }
                 std::cout << "Enter Password: ";
                 pass = getMaskedPassword();
                 
@@ -386,12 +408,24 @@ int main() {
             case 2: {
                 std::string id, name, pass;
                 std::cout << "Enter new customer ID (unique): ";
-                std::cin >> id;
+                if (!(std::cin >> id)) { exit(0); }
+                if (containsInvalidChars(id)) {
+                    std::cout << "Error: ID cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter Full Name: ";
                 std::cin.ignore();
-                std::getline(std::cin, name);
+                if (!std::getline(std::cin, name)) { exit(0); }
+                if (containsInvalidChars(name)) {
+                    std::cout << "Error: Name cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 std::cout << "Enter password: ";
                 pass = getMaskedPassword();
+                if (containsInvalidChars(pass)) {
+                    std::cout << "Error: Password cannot contain '|' or ',' characters.\n";
+                    break;
+                }
                 
                 if (system.registerUser(id, name, pass, "customer")) {
                     std::cout << "Customer registered successfully! You can now log in.\n";

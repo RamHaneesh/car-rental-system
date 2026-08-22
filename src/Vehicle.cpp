@@ -49,23 +49,27 @@ static std::vector<std::string> splitString(const std::string& s, char delimiter
 }
 
 Vehicle Vehicle::deserialize(const std::string& line) {
-    std::vector<std::string> parts = splitString(line, '|');
-    if (parts.size() < 7) {
+    try {
+        std::vector<std::string> parts = splitString(line, '|');
+        if (parts.size() < 7) {
+            return Vehicle();
+        }
+        
+        std::string company = parts[0];
+        std::string model = parts[1];
+        std::string regNo = parts[2];
+        std::string type = parts[3];
+        int pricePerDay = std::stoi(parts[4]);
+        std::string rentedTo = parts[5];
+        Date dueDate = Date::parse(parts[6]);
+
+        Vehicle v(company, model, regNo, type, pricePerDay);
+        v.rentedTo = rentedTo;
+        v.dueDate = dueDate;
+        return v;
+    } catch (...) {
         return Vehicle();
     }
-    
-    std::string company = parts[0];
-    std::string model = parts[1];
-    std::string regNo = parts[2];
-    std::string type = parts[3];
-    int pricePerDay = std::stoi(parts[4]);
-    std::string rentedTo = parts[5];
-    Date dueDate = Date::parse(parts[6]);
-
-    Vehicle v(company, model, regNo, type, pricePerDay);
-    v.rentedTo = rentedTo;
-    v.dueDate = dueDate;
-    return v;
 }
 
 void Vehicle::display() const {

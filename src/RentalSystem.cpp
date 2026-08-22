@@ -195,15 +195,12 @@ bool RentalSystem::removeVehicle(const std::string& regNo) {
 
     Vehicle& v = it->second;
     if (!v.isAvailable()) {
-        // If vehicle is rented, we must first clear it from user profile
         std::string userId = v.getRentedTo();
-        User* user = getUser(userId);
-        if (user) {
-            user->removeRentedVehicle(regNo);
-        }
+        // Settle return, record log and fine before erasing
+        returnVehicle(userId, regNo);
     }
 
-    vehicles.erase(it);
+    vehicles.erase(regNo);
     saveDatabase();
     return true;
 }

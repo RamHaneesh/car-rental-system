@@ -74,43 +74,47 @@ static std::vector<std::string> splitString(const std::string& s, char delimiter
 User* User::deserialize(const std::string& line) {
     if (line.empty()) return nullptr;
     
-    std::vector<std::string> parts = splitString(line, '|');
-    if (parts.size() < 8) return nullptr;
+    try {
+        std::vector<std::string> parts = splitString(line, '|');
+        if (parts.size() < 8) return nullptr;
 
-    std::string id = parts[0];
-    std::string name = parts[1];
-    std::string password = parts[2];
-    std::string role = parts[3];
-    int fineAmount = std::stoi(parts[4]);
-    int maxCars = std::stoi(parts[5]);
-    int rentDays = std::stoi(parts[6]);
-    int fineRate = std::stoi(parts[7]);
+        std::string id = parts[0];
+        std::string name = parts[1];
+        std::string password = parts[2];
+        std::string role = parts[3];
+        int fineAmount = std::stoi(parts[4]);
+        int maxCars = std::stoi(parts[5]);
+        int rentDays = std::stoi(parts[6]);
+        int fineRate = std::stoi(parts[7]);
 
-    User* user = nullptr;
-    if (role == "admin") {
-        user = new Admin(id, name, password);
-    } else if (role == "employee") {
-        user = new Employee(id, name, password);
-    } else {
-        user = new Customer(id, name, password);
-    }
+        User* user = nullptr;
+        if (role == "admin") {
+            user = new Admin(id, name, password);
+        } else if (role == "employee") {
+            user = new Employee(id, name, password);
+        } else {
+            user = new Customer(id, name, password);
+        }
 
-    user->setFineAmount(fineAmount);
-    // Overwrite config values in case they were altered in file
-    user->maxCars = maxCars;
-    user->rentDays = rentDays;
-    user->fineRate = fineRate;
+        user->setFineAmount(fineAmount);
+        // Overwrite config values in case they were altered in file
+        user->maxCars = maxCars;
+        user->rentDays = rentDays;
+        user->fineRate = fineRate;
 
-    if (parts.size() > 8 && !parts[8].empty()) {
-        std::vector<std::string> vehicles = splitString(parts[8], ',');
-        for (const auto& regNo : vehicles) {
-            if (!regNo.empty()) {
-                user->addRentedVehicle(regNo);
+        if (parts.size() > 8 && !parts[8].empty()) {
+            std::vector<std::string> vehicles = splitString(parts[8], ',');
+            for (const auto& regNo : vehicles) {
+                if (!regNo.empty()) {
+                    user->addRentedVehicle(regNo);
+                }
             }
         }
-    }
 
-    return user;
+        return user;
+    } catch (...) {
+        return nullptr;
+    }
 }
 
 void User::display() const {
