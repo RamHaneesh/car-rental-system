@@ -60,6 +60,7 @@ public:
 
     // Logs & Audit
     void displayTransactions() const;
+    void displayDashboard() const;
 };
 
 #endif // RENTAL_SYSTEM_H

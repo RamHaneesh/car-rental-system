@@ -294,12 +294,32 @@ bool RentalSystem::returnVehicle(const std::string& userId, const std::string& r
         return false;
     }
 
+    int daysLate = 0;
+    if (systemDate > vehicle->getDueDate()) {
+        daysLate = systemDate.difference(vehicle->getDueDate());
+    }
+
     // Calculate late fines
     int fine = calculateFine(*vehicle);
     if (fine > 0) {
         user->addFine(fine);
-        std::cout << "Return Alert: Late return detected. A fine of $" << fine << " has been added to your account.\n";
     }
+
+    // Print Receipt
+    std::cout << "\n================ RENTAL RETURN RECEIPT ================\n";
+    std::cout << "User ID:          " << userId << "\n";
+    std::cout << "Vehicle Reg No:   " << regNo << "\n";
+    std::cout << "Vehicle Model:    " << vehicle->getCompany() << " " << vehicle->getModel() << "\n";
+    std::cout << "Due Date:         " << vehicle->getDueDate().toString() << "\n";
+    std::cout << "Return Date:      " << systemDate.toString() << "\n";
+    if (fine > 0) {
+        std::cout << "Days Overdue:     " << daysLate << " day(s)\n";
+        std::cout << "Late Fine Rate:   $" << user->getFineRate() << "/day\n";
+        std::cout << "Total Fines:      $" << fine << " (Added to account)\n";
+    } else {
+        std::cout << "Return Status:    ON TIME (No Fines)\n";
+    }
+    std::cout << "=======================================================\n\n";
 
     // Perform return
     user->removeRentedVehicle(regNo);
@@ -426,4 +446,53 @@ void RentalSystem::displayTransactions() const {
     }
     txFile.close();
     std::cout << "======================================================================\n";
+}
+
+void RentalSystem::displayDashboard() const {
+    int totalRentals = 0;
+    int activeRentals = 0;
+    for (const auto& pair : vehicles) {
+        totalRentals++;
+        if (!pair.second.isAvailable()) {
+            activeRentals++;
+        }
+    }
+
+    int totalRentRevenue = 0;
+    int totalFineRevenue = 0;
+
+    std::ifstream txFile(transactionsFilePath);
+    if (txFile.is_open()) {
+        std::string line;
+        while (std::getline(txFile, line)) {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string date, uid, act, reg;
+            std::string dur, cost, fine;
+            
+            std::getline(ss, date, '|');
+            std::getline(ss, uid, '|');
+            std::getline(ss, act, '|');
+            std::getline(ss, reg, '|');
+            std::getline(ss, dur, '|');
+            std::getline(ss, cost, '|');
+            std::getline(ss, fine, '|');
+
+            if (act == "RENT") {
+                totalRentRevenue += std::stoi(cost);
+            } else if (act == "PAY_FINE") {
+                totalFineRevenue += std::stoi(cost);
+            }
+        }
+        txFile.close();
+    }
+
+    std::cout << "\n================ REVENUE & SYSTEM DASHBOARD ================\n";
+    std::cout << "Total Vehicles in Fleet:   " << totalRentals << "\n";
+    std::cout << "Active Rented Vehicles:    " << activeRentals << " (" 
+              << (totalRentals > 0 ? (activeRentals * 100 / totalRentals) : 0) << "% utilization)\n";
+    std::cout << "Total Rental Earnings:     $" << totalRentRevenue << "\n";
+    std::cout << "Total Fines Collected:     $" << totalFineRevenue << "\n";
+    std::cout << "Total System Revenue:      $" << (totalRentRevenue + totalFineRevenue) << "\n";
+    std::cout << "============================================================\n";
 }

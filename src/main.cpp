@@ -2,6 +2,7 @@
 #include <string>
 #include <limits>
 #include <iomanip>
+#include <conio.h>
 #include "RentalSystem.h"
 
 void showWelcomeArt() {
@@ -29,6 +30,27 @@ void showExitArt() {
 void clearInput() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+std::string getMaskedPassword() {
+    std::string password = "";
+    char ch;
+    while (true) {
+        ch = _getch();
+        if (ch == '\r' || ch == '\n') { // Enter key
+            break;
+        } else if (ch == '\b') { // Backspace
+            if (!password.empty()) {
+                password.pop_back();
+                std::cout << "\b \b";
+            }
+        } else if (ch >= 32 && ch <= 126) { // Printable chars
+            password.push_back(ch);
+            std::cout << '*';
+        }
+    }
+    std::cout << "\n";
+    return password;
 }
 
 void displayGuestHelp() {
@@ -63,10 +85,11 @@ void displayAdminHelp() {
     std::cout << "6. Add a User                 : Register Customer, Employee, or Admin.\n";
     std::cout << "7. Delete a User              : Remove user and force checkout returns.\n";
     std::cout << "8. View Transaction Log       : Open system transaction auditing trail.\n";
-    std::cout << "9. Show System Date           : View current simulated calendar date.\n";
-    std::cout << "10. Advance System Date       : Shift time forward to test late return fines.\n";
-    std::cout << "11. Logout                    : Sign out of Administrator mode.\n";
-    std::cout << "12. Exit                      : Terminate the program.\n";
+    std::cout << "9. View Revenue Dashboard     : View fleet utilization and total system earnings.\n";
+    std::cout << "10. Show System Date          : View current simulated calendar date.\n";
+    std::cout << "11. Advance System Date       : Shift time forward to test late return fines.\n";
+    std::cout << "12. Logout                    : Sign out of Administrator mode.\n";
+    std::cout << "13. Exit                      : Terminate the program.\n";
     std::cout << "====================================================\n";
 }
 
@@ -257,7 +280,7 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
                 std::cin.ignore();
                 std::getline(std::cin, name);
                 std::cout << "Enter password: ";
-                std::cin >> pass;
+                pass = getMaskedPassword();
                 std::cout << "Enter role (customer/employee/admin): ";
                 std::cin >> role;
                 if (role != "customer" && role != "employee" && role != "admin") {
@@ -286,9 +309,12 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
                 system.displayTransactions();
                 break;
             case 9:
+                system.displayDashboard();
+                break;
+            case 10:
                 std::cout << "Current Simulated Date: " << system.getSystemDate() << "\n";
                 break;
-            case 10: {
+            case 11: {
                 int days;
                 std::cout << "Enter number of days to shift system time forward: ";
                 if (std::cin >> days && days > 0) {
@@ -299,11 +325,11 @@ void handleAdminMenu(RentalSystem& system, User* admin) {
                 }
                 break;
             }
-            case 11:
+            case 12:
                 logout = true;
                 std::cout << "Logged out.\n";
                 break;
-            case 12:
+            case 13:
                 showExitArt();
                 exit(0);
             default:
@@ -344,7 +370,7 @@ int main() {
                 std::cout << "Enter ID: ";
                 std::cin >> id;
                 std::cout << "Enter Password: ";
-                std::cin >> pass;
+                pass = getMaskedPassword();
                 
                 User* user = system.loginUser(id, pass);
                 if (user) {
@@ -367,7 +393,7 @@ int main() {
                 std::cin.ignore();
                 std::getline(std::cin, name);
                 std::cout << "Enter password: ";
-                std::cin >> pass;
+                pass = getMaskedPassword();
                 
                 if (system.registerUser(id, name, pass, "customer")) {
                     std::cout << "Customer registered successfully! You can now log in.\n";
