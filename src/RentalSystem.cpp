@@ -29,42 +29,65 @@ RentalSystem::~RentalSystem() {
 void RentalSystem::loadDatabase() {
     // Load Users
     std::ifstream usersFile(usersFilePath);
+    bool shouldSeedUsers = false;
     if (!usersFile.is_open()) {
-        // Seed default admin and initial users if file doesn't exist
+        shouldSeedUsers = true;
+    } else {
+        usersFile.peek();
+        if (usersFile.eof()) {
+            shouldSeedUsers = true;
+        }
+        usersFile.close();
+    }
+
+    if (shouldSeedUsers) {
         std::cout << "Initializing database. Creating default admin...\n";
         registerUser("admin", "Admin Manager", "admin", "admin");
         registerUser("cust1", "John Doe", "password", "customer");
         registerUser("emp1", "Alice Smith", "password", "employee");
     } else {
+        std::ifstream file(usersFilePath);
         std::string line;
-        while (std::getline(usersFile, line)) {
+        while (std::getline(file, line)) {
             if (line.empty()) continue;
             User* u = User::deserialize(line);
             if (u) {
                 users[u->getId()] = u;
             }
         }
-        usersFile.close();
+        file.close();
     }
 
     // Load Vehicles
     std::ifstream vehiclesFile(vehiclesFilePath);
+    bool shouldSeedVehicles = false;
     if (!vehiclesFile.is_open()) {
+        shouldSeedVehicles = true;
+    } else {
+        vehiclesFile.peek();
+        if (vehiclesFile.eof()) {
+            shouldSeedVehicles = true;
+        }
+        vehiclesFile.close();
+    }
+
+    if (shouldSeedVehicles) {
         std::cout << "Initializing car database. Seeding initial fleet...\n";
         addVehicle("Toyota", "Camry", "CAR-101", "Sedan", 50);
         addVehicle("Honda", "CR-V", "CAR-202", "SUV", 75);
         addVehicle("Ford", "Mustang", "CAR-303", "Sports", 120);
         addVehicle("Chevrolet", "Bolt", "CAR-404", "Electric", 60);
     } else {
+        std::ifstream file(vehiclesFilePath);
         std::string line;
-        while (std::getline(vehiclesFile, line)) {
+        while (std::getline(file, line)) {
             if (line.empty()) continue;
             Vehicle v = Vehicle::deserialize(line);
             if (!v.getRegNo().empty()) {
                 vehicles[v.getRegNo()] = v;
             }
         }
-        vehiclesFile.close();
+        file.close();
     }
 }
 
