@@ -6,25 +6,23 @@
 #include "RentalSystem.h"
 
 void showWelcomeArt() {
-    std::cout << "\n\033[3m";
+    std::cout << "\n";
     std::cout << "      __      __       .__                                \n";
     std::cout << "     /  \\    /  \\ ____ |  |   ____  ____   _____   ____   \n";
     std::cout << "     \\   \\/\\/   // __ \\|  | _/ ___\\/  _ \\ /     \\_/ __ \\  \n";
     std::cout << "      \\        /\\  ___/|  |_\\  \\__(  <_> )  Y Y  \\  ___/  \n";
     std::cout << "       \\__/\\__/  \\____ >____/\\____ >____/|__|_|__/\\____ > \n";
     std::cout << "                   CAR RENTAL CLI SYSTEM                  \n";
-    std::cout << "\033[0m";
 }
 
 void showExitArt() {
-    std::cout << "\n\033[3m";
+    std::cout << "\n";
     std::cout << "   ______            __    __             \n";
     std::cout << "  / ____/___  ____  / /_  / /_  __  _____ \n";
     std::cout << " / / __/ __ \\/ __ \\/ __ \\/ __ \\/ / / / _ \\\n";
     std::cout << "/ /_/ / /_/ / /_/ / /_/ / /_/ / /_/ /  __/\n";
     std::cout << "\\____/\\____/\\____/_.___/_.___/\\__, /\\___/ \n";
     std::cout << "                             /____/       \n";
-    std::cout << "\033[0m";
 }
 
 void clearInput() {
