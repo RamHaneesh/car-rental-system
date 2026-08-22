@@ -100,6 +100,18 @@ bool Date::operator<=(const Date& other) const {
     return (*this < other) || (*this == other);
 }
 
+bool Date::operator>(const Date& other) const {
+    return other < *this;
+}
+
+bool Date::operator>=(const Date& other) const {
+    return !(*this < other);
+}
+
+bool Date::operator!=(const Date& other) const {
+    return !(*this == other);
+}
+
 std::ostream& operator<<(std::ostream& os, const Date& date) {
     os << date.toString();
     return os;
